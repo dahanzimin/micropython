@@ -28,8 +28,6 @@
 #include "py/mphal.h"
 #include "modmachine.h"
 
-#if CONFIG_IDF_TARGET_ESP32
-
 #include "driver/gpio.h"
 #if CONFIG_IDF_TARGET_ESP32
 #include "driver/touch_pad.h"
@@ -56,24 +54,6 @@ STATIC const mtp_obj_t touchpad_obj[] = {
     {{&machine_touchpad_type}, GPIO_NUM_33, TOUCH_PAD_NUM8},
     {{&machine_touchpad_type}, GPIO_NUM_32, TOUCH_PAD_NUM9},
 };
-#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
-STATIC const mtp_obj_t touchpad_obj[] = {
-    {{&machine_touchpad_type}, GPIO_NUM_1, TOUCH_PAD_NUM1},
-    {{&machine_touchpad_type}, GPIO_NUM_2, TOUCH_PAD_NUM2},
-    {{&machine_touchpad_type}, GPIO_NUM_3, TOUCH_PAD_NUM3},
-    {{&machine_touchpad_type}, GPIO_NUM_4, TOUCH_PAD_NUM4},
-    {{&machine_touchpad_type}, GPIO_NUM_5, TOUCH_PAD_NUM5},
-    {{&machine_touchpad_type}, GPIO_NUM_6, TOUCH_PAD_NUM6},
-    {{&machine_touchpad_type}, GPIO_NUM_7, TOUCH_PAD_NUM7},
-    {{&machine_touchpad_type}, GPIO_NUM_8, TOUCH_PAD_NUM8},
-    {{&machine_touchpad_type}, GPIO_NUM_9, TOUCH_PAD_NUM9},
-    {{&machine_touchpad_type}, GPIO_NUM_10, TOUCH_PAD_NUM10},
-    {{&machine_touchpad_type}, GPIO_NUM_11, TOUCH_PAD_NUM11},
-    {{&machine_touchpad_type}, GPIO_NUM_12, TOUCH_PAD_NUM12},
-    {{&machine_touchpad_type}, GPIO_NUM_13, TOUCH_PAD_NUM13},
-    {{&machine_touchpad_type}, GPIO_NUM_14, TOUCH_PAD_NUM14},
-};
-#endif
 
 STATIC mp_obj_t mtp_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     const mp_obj_t *args) {
@@ -114,7 +94,6 @@ STATIC mp_obj_t mtp_config(mp_obj_t self_in, mp_obj_t value_in) {
     mp_raise_ValueError(MP_ERROR_TEXT("Touch pad error"));
 }
 MP_DEFINE_CONST_FUN_OBJ_2(mtp_config_obj, mtp_config);
-
 STATIC mp_obj_t mtp_read(mp_obj_t self_in) {
     mtp_obj_t *self = self_in;
     uint16_t value;
@@ -141,4 +120,90 @@ const mp_obj_type_t machine_touchpad_type = {
     .locals_dict = (mp_obj_t)&mtp_locals_dict,
 };
 
-#endif // CONFIG_IDF_TARGET_ESP32
+
+#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+STATIC const mtp_obj_t touchpad_obj[] = {
+    {{&machine_touchpad_type}, GPIO_NUM_1, TOUCH_PAD_NUM1},
+    {{&machine_touchpad_type}, GPIO_NUM_2, TOUCH_PAD_NUM2},
+    {{&machine_touchpad_type}, GPIO_NUM_3, TOUCH_PAD_NUM3},
+    {{&machine_touchpad_type}, GPIO_NUM_4, TOUCH_PAD_NUM4},
+    {{&machine_touchpad_type}, GPIO_NUM_5, TOUCH_PAD_NUM5},
+    {{&machine_touchpad_type}, GPIO_NUM_6, TOUCH_PAD_NUM6},
+    {{&machine_touchpad_type}, GPIO_NUM_7, TOUCH_PAD_NUM7},
+    {{&machine_touchpad_type}, GPIO_NUM_8, TOUCH_PAD_NUM8},
+    {{&machine_touchpad_type}, GPIO_NUM_9, TOUCH_PAD_NUM9},
+    {{&machine_touchpad_type}, GPIO_NUM_10, TOUCH_PAD_NUM10},
+    {{&machine_touchpad_type}, GPIO_NUM_11, TOUCH_PAD_NUM11},
+    {{&machine_touchpad_type}, GPIO_NUM_12, TOUCH_PAD_NUM12},
+    {{&machine_touchpad_type}, GPIO_NUM_13, TOUCH_PAD_NUM13},
+    {{&machine_touchpad_type}, GPIO_NUM_14, TOUCH_PAD_NUM14},
+};
+
+STATIC mp_obj_t mtp_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
+    const mp_obj_t *args) {
+
+    mp_arg_check_num(n_args, n_kw, 1, 1, true);
+    gpio_num_t pin_id = machine_pin_get_id(args[0]);
+    const mtp_obj_t *self = NULL;
+    for (int i = 0; i < MP_ARRAY_SIZE(touchpad_obj); i++) {
+        if (pin_id == touchpad_obj[i].gpio_id) {
+            self = &touchpad_obj[i];
+            break;
+        }
+    }
+    if (!self) {
+        mp_raise_ValueError(MP_ERROR_TEXT("invalid pin for touchpad"));
+    }
+
+    static int initialized = 0;
+    if (!initialized) {
+        touch_pad_init();
+        touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
+	touch_pad_fsm_start();//////////////////revise/////////
+        initialized = 1;
+    }
+    esp_err_t err = touch_pad_config(self->touchpad_id);
+    if (err == ESP_OK) {
+        return MP_OBJ_FROM_PTR(self);
+    }
+    mp_raise_ValueError(MP_ERROR_TEXT("Touch pad error"));
+}
+
+STATIC mp_obj_t mtp_config(mp_obj_t self_in, mp_obj_t value_in) {
+    mtp_obj_t *self = self_in;
+    mp_obj_get_int(value_in);// uint16_t value;
+    esp_err_t err = touch_pad_config(self->touchpad_id);
+    if (err == ESP_OK) {
+        return mp_const_none;
+    }
+    mp_raise_ValueError(MP_ERROR_TEXT("Touch pad error"));
+}
+MP_DEFINE_CONST_FUN_OBJ_2(mtp_config_obj, mtp_config);
+STATIC mp_obj_t mtp_read(mp_obj_t self_in) {
+    mtp_obj_t *self = self_in;
+    uint32_t value;// uint16_t value;
+    esp_err_t err = touch_pad_read_raw_data(self->touchpad_id, &value);
+    if (err == ESP_OK) {
+        return MP_OBJ_NEW_SMALL_INT(value);
+    }
+    mp_raise_ValueError(MP_ERROR_TEXT("Touch pad error"));
+}
+MP_DEFINE_CONST_FUN_OBJ_1(mtp_read_obj, mtp_read);
+
+STATIC const mp_rom_map_elem_t mtp_locals_dict_table[] = {
+    // instance methods
+    { MP_ROM_QSTR(MP_QSTR_config), MP_ROM_PTR(&mtp_config_obj) },
+    { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&mtp_read_obj) },
+};
+
+STATIC MP_DEFINE_CONST_DICT(mtp_locals_dict, mtp_locals_dict_table);
+
+const mp_obj_type_t machine_touchpad_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_TouchPad,
+    .make_new = mtp_make_new,
+    .locals_dict = (mp_obj_t)&mtp_locals_dict,
+};
+
+
+#endif
