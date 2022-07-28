@@ -35,13 +35,13 @@
 #include "driver/touch_sensor.h"
 #endif
 
+#if CONFIG_IDF_TARGET_ESP32
 typedef struct _mtp_obj_t {
     mp_obj_base_t base;
     gpio_num_t gpio_id;
     touch_pad_t touchpad_id;
 } mtp_obj_t;
 
-#if CONFIG_IDF_TARGET_ESP32
 STATIC const mtp_obj_t touchpad_obj[] = {
     {{&machine_touchpad_type}, GPIO_NUM_4, TOUCH_PAD_NUM0},
     {{&machine_touchpad_type}, GPIO_NUM_0, TOUCH_PAD_NUM1},
@@ -122,6 +122,13 @@ const mp_obj_type_t machine_touchpad_type = {
 
 
 #elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+
+typedef struct _mtp_obj_t {
+    mp_obj_base_t base;
+    gpio_num_t gpio_id;
+    touch_pad_t touchpad_id;
+} mtp_obj_t;
+
 STATIC const mtp_obj_t touchpad_obj[] = {
     {{&machine_touchpad_type}, GPIO_NUM_1, TOUCH_PAD_NUM1},
     {{&machine_touchpad_type}, GPIO_NUM_2, TOUCH_PAD_NUM2},
