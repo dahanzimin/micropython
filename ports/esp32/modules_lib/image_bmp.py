@@ -27,6 +27,18 @@ class Image:
             gc.collect()
             return buffer 			#Return image data, character width and height (pixels)
 
+    def load_py(self, name, invert=0):
+        self.invert = invert
+        image_type = name[0:2]
+        if image_type == b'P4':
+            buffer = self._pbm_decode(name)
+        elif image_type == b'BM':
+            buffer = self._bmp_decode(name)
+        else:
+            raise TypeError("Unsupported image format {}".format(image_type))
+        gc.collect()
+        return buffer           #Return image data, character width and height (pixels)
+
     def _pbm_decode(self, img_arrays):
         next_value = bytearray()
         pnm_header = []

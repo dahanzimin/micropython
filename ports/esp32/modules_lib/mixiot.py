@@ -198,7 +198,18 @@ class MQTTClient:
         resp = self.sock.read(4)
         assert resp[0] == 0x20 and resp[1] == 0x02
         if resp[3] != 0:
-            raise MQTTException(resp[3])
+            if resp[3] == 1:
+                raise MQTTException("Unsupported Protocol")
+            elif resp[3] == 2:
+                raise MQTTException("Illegal ClientID")
+            elif resp[3] == 3:
+                raise MQTTException("Server Unavailable")
+            elif resp[3] == 4:
+                raise MQTTException("Invalid username and password format")
+            elif resp[3] == 5:
+                raise MQTTException("Unauthorized")
+            else:
+                raise MQTTException(resp[3])
         return resp[2] & 1
 
 

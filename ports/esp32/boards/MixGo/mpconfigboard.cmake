@@ -5,7 +5,4 @@ set(SDKCONFIG_DEFAULTS
     boards/MixGo/sdkconfig.board
 )
 
-if(NOT MICROPY_FROZEN_MANIFEST)
-    #set(MICROPY_FROZEN_MANIFEST ${MICROPY_BOARD_DIR}/manifest.py)
-    set(MICROPY_FROZEN_MANIFEST ${MICROPY_PORT_DIR}/boards/manifest.py)
-endif()
+set(MICROPY_FROZEN_MANIFEST ${MICROPY_BOARD_DIR}/manifest.py)
