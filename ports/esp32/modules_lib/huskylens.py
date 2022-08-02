@@ -187,10 +187,10 @@ class HuskyLens:
 
 	def is_learned(self,get_id):
 		'''从结果中获取获取IDx是否已学习'''
-		if len(self._buffer) > 0:
-			for i in self._buffer :
-				if i.id == get_id :
-					return i.learned
+		if 0 <  get_id < self._learned_number:
+			return True
+		else:
+			return False
 
 	def is_appear(self,get_id,shape):
 		'''从结果中获取获取IDx 方块或箭头 是否在画面中'''

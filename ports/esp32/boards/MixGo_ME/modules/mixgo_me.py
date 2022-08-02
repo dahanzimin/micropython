@@ -43,7 +43,7 @@ except Exception as e:
 
 '''2RGB_WS2812'''    #color_chase(),rainbow_cycle()方法移至类里
 from ws2812 import NeoPixel
-onboard_rgb = NeoPixel(Pin(9), 2, ORDER=(0, 1, 2, 3))
+onboard_rgb = NeoPixel(Pin(9), 2, ORDER=(0, 1, 2, 3),multiplex=1)
 
 '''1Buzzer-Music'''
 from music import MIDI

@@ -14,16 +14,19 @@ from time import sleep
 from machine import bitstream
 
 class NeoPixel:
-	def __init__(self, pin, n, bpp=3, timing=1,ORDER=(1, 0, 2, 3)):
+	def __init__(self, pin, n, bpp=3, timing=1,ORDER=(1, 0, 2, 3),invert=0,multiplex=0):
 		self.pin = pin
 		self.n = n
 		self.bpp = bpp
 		self.ORDER=ORDER
+		self.invert=invert
+		self.multiplex=multiplex
 		self.buf = bytearray(n * bpp)
-		self.timing = (
-			((400, 850, 800, 450) if timing else (800, 1700, 1600, 900))
-			if isinstance(timing, int)
-			else timing)
+		self.timing = (((400, 850, 800, 450) if timing else (800, 1700, 1600, 900))	if isinstance(timing, int) else timing)
+
+		if not self.multiplex:
+			self.pin.init(self.pin.OUT)
+
 		self.fill((0, 0, 0))
 		self.write()
 
@@ -33,27 +36,32 @@ class NeoPixel:
 	def __setitem__(self, i, v):
 		offset = i * self.bpp
 		for i in range(self.bpp):
-			self.buf[offset + self.ORDER[i]] = v[i]
+			self.buf[offset + self.ORDER[i]] = 255-v[i] if self.invert else v[i] 
 
 	def __getitem__(self, i):
 		offset = i * self.bpp
-		return tuple(self.buf[offset + self.ORDER[i]] for i in range(self.bpp))
+		if self.invert:
+			return tuple(255-self.buf[offset + self.ORDER[i]] for i in range(self.bpp))
+		else:
+			return tuple(self.buf[offset + self.ORDER[i]] for i in range(self.bpp))
 
 	def fill(self, v):
 		b = self.buf
 		l = len(self.buf)
 		bpp = self.bpp
 		for i in range(bpp):
-			c = v[i]
+			c = 255-v[i] if self.invert else v[i] 
 			j = self.ORDER[i]
 			while j < l:
 				b[j] = c
 				j += bpp
 
 	def write(self):
-		self.pin.init(self.pin.OUT)
+		if self.multiplex:
+			self.pin.init(self.pin.OUT)
 		bitstream(self.pin, 0, self.timing, self.buf)
-		self.pin.init(self.pin.IN)
+		if self.multiplex:
+			self.pin.init(self.pin.IN)
 
 	def color_chase(self,R, G, B, wait):
 		for i in range(self.n):
@@ -68,6 +76,8 @@ class NeoPixel:
 				self.__setitem__(i,self.wheel(rc_index & 255))
 			self.write()
 			sleep(wait/1000/256)
+		self.fill((0, 0, 0))
+		self.write()
 
 	def wheel(self,pos):
 		if pos < 0 or pos > 255:
