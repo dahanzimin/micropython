@@ -50,3 +50,6 @@
 	url = https://github.com/andrewleech/wiznet_ioLibrary_Driver.git
 	# Requires https://github.com/Wiznet/ioLibrary_Driver/pull/120
 	# url = https://github.com/Wiznet/ioLibrary_Driver.git
+[submodule "drivers/mixly2.0_src"]
+	path = drivers/mixly2.0_src
+	url = https://gitee.com/mixly2/mixly2.0_src.git
