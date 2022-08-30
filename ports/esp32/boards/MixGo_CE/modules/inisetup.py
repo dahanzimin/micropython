@@ -44,7 +44,7 @@ from neopixel import NeoPixel
 from machine import Pin
 
 power_rgb = NeoPixel(Pin(45), 1)
-power_rgb.fill((0, 5, 0))
+power_rgb.fill((0, 3, 0))
 power_rgb.write()
 
 """
