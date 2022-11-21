@@ -177,12 +177,13 @@ STATIC const mp_rom_map_elem_t lwip_slip_locals_dict_table[] = {
 
 STATIC MP_DEFINE_CONST_DICT(lwip_slip_locals_dict, lwip_slip_locals_dict_table);
 
-STATIC const mp_obj_type_t lwip_slip_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_slip,
-    .make_new = lwip_slip_make_new,
-    .locals_dict = (mp_obj_dict_t *)&lwip_slip_locals_dict,
-};
+STATIC MP_DEFINE_CONST_OBJ_TYPE(
+    lwip_slip_type,
+    MP_QSTR_slip,
+    MP_TYPE_FLAG_NONE,
+    make_new, lwip_slip_make_new,
+    locals_dict, &lwip_slip_locals_dict
+    );
 
 #endif // MICROPY_PY_LWIP_SLIP
 
@@ -930,9 +931,20 @@ STATIC mp_obj_t lwip_socket_listen(size_t n_args, const mp_obj_t *args) {
         mp_raise_OSError(MP_EOPNOTSUPP);
     }
 
-    struct tcp_pcb *new_pcb = tcp_listen_with_backlog(socket->pcb.tcp, (u8_t)backlog);
+    struct tcp_pcb *new_pcb;
+    #if LWIP_VERSION_MACRO < 0x02000100
+    new_pcb = tcp_listen_with_backlog(socket->pcb.tcp, (u8_t)backlog);
+    #else
+    err_t error;
+    new_pcb = tcp_listen_with_backlog_and_err(socket->pcb.tcp, (u8_t)backlog, &error);
+    #endif
+
     if (new_pcb == NULL) {
+        #if LWIP_VERSION_MACRO < 0x02000100
         mp_raise_OSError(MP_ENOMEM);
+        #else
+        mp_raise_OSError(error_lookup_table[-error]);
+        #endif
     }
     socket->pcb.tcp = new_pcb;
 
@@ -1594,14 +1606,15 @@ STATIC const mp_stream_p_t lwip_socket_stream_p = {
     .ioctl = lwip_socket_ioctl,
 };
 
-STATIC const mp_obj_type_t lwip_socket_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_socket,
-    .print = lwip_socket_print,
-    .make_new = lwip_socket_make_new,
-    .protocol = &lwip_socket_stream_p,
-    .locals_dict = (mp_obj_dict_t *)&lwip_socket_locals_dict,
-};
+STATIC MP_DEFINE_CONST_OBJ_TYPE(
+    lwip_socket_type,
+    MP_QSTR_socket,
+    MP_TYPE_FLAG_NONE,
+    make_new, lwip_socket_make_new,
+    print, lwip_socket_print,
+    protocol, &lwip_socket_stream_p,
+    locals_dict, &lwip_socket_locals_dict
+    );
 
 /******************************************************************************/
 // Support functions for memory protection. lwIP has its own memory management

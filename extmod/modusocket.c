@@ -32,10 +32,11 @@
 #include "py/runtime.h"
 #include "py/stream.h"
 #include "py/mperrno.h"
-#include "shared/netutils/netutils.h"
-#include "modnetwork.h"
 
 #if MICROPY_PY_NETWORK && MICROPY_PY_USOCKET && !MICROPY_PY_LWIP
+
+#include "shared/netutils/netutils.h"
+#include "modnetwork.h"
 
 /******************************************************************************/
 // socket class
@@ -528,14 +529,15 @@ STATIC const mp_stream_p_t socket_stream_p = {
     .is_text = false,
 };
 
-STATIC const mp_obj_type_t socket_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_socket,
-    .print = socket_print,
-    .make_new = socket_make_new,
-    .protocol = &socket_stream_p,
-    .locals_dict = (mp_obj_dict_t *)&socket_locals_dict,
-};
+STATIC MP_DEFINE_CONST_OBJ_TYPE(
+    socket_type,
+    MP_QSTR_socket,
+    MP_TYPE_FLAG_NONE,
+    make_new, socket_make_new,
+    protocol, &socket_stream_p,
+    locals_dict, &socket_locals_dict,
+    print, socket_print
+    );
 
 /******************************************************************************/
 // usocket module
