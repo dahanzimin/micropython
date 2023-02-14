@@ -1,0 +1,2 @@
+#define MICROPY_HW_BOARD_NAME "MG_4MB Libs"
+#define MICROPY_HW_MCU_NAME "ESP32"
