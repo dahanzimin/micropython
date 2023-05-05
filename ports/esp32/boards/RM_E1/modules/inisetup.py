@@ -43,15 +43,6 @@ def setup():
 from machine import Pin
 from time import  sleep
 
-if not Pin(35, Pin.IN).value():
-    from neopixel import NeoPixel
-    _rgb = NeoPixel(Pin(12), 2)
-    _rgb.fill((10, 0, 0))
-    _rgb.write()
-    print("Entering forced blocking mode")
-    while True:
-        pass
-
 def irq_func(ikey):
     sleep(0.05)
     if ikey.value():
@@ -67,6 +58,16 @@ ikey = Pin(34, Pin.IN )
 ikey.irq(handler= irq_func, trigger= Pin.IRQ_RISING)
 gled.value(1)
 ccen.value(1)
+
+if not Pin(35, Pin.IN).value():
+    from neopixel import NeoPixel
+    _rgb = NeoPixel(Pin(12), 2)
+    _rgb.fill((10, 0, 0))
+    _rgb.write()
+    print("Entering forced blocking mode")
+    while True:
+        pass
+
 """
         )
     return vfs
