@@ -39,17 +39,27 @@ def setup():
     with open("boot.py", "w") as f:
         f.write(
             """\
-#The green light is on by default when powered on
-from neopixel import NeoPixel
+#Press the key to interrupt the startup and shutdown program
 from machine import Pin
+from time import  sleep
 
-power_rgb = NeoPixel(Pin(45), 1)
-power_rgb.fill((0, 3, 0))
-power_rgb.write()
+def irq_func(power_key):
+    sleep(0.05)
+    if power_key.value():
+        sleep(0.05)
+        if power_key.value():
+            power_en.value(not power_en.value())
 
-if not Pin(35, Pin.IN, Pin.PULL_UP).value():
-    power_rgb.fill((3, 0, 0))
-    power_rgb.write()
+power_en = Pin(5,  Pin.OUT)
+power_key = Pin(34, Pin.IN )
+power_key.irq(handler= irq_func, trigger= Pin.IRQ_RISING)
+power_en.value(1)
+
+if not Pin(39, Pin.IN).value():
+    from neopixel import NeoPixel
+    _rgb = NeoPixel(Pin(12), 2)
+    _rgb.fill((10, 0, 0))
+    _rgb.write()
     print("Entering forced blocking mode")
     while True:
         pass

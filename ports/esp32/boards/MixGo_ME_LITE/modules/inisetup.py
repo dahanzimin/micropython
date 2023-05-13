@@ -39,17 +39,14 @@ def setup():
     with open("boot.py", "w") as f:
         f.write(
             """\
-#The green light is on by default when powered on
-from neopixel import NeoPixel
+#Judging the blocking mode is helpful to enter the terminal.
 from machine import Pin
 
-power_rgb = NeoPixel(Pin(45), 1)
-power_rgb.fill((0, 3, 0))
-power_rgb.write()
-
-if not Pin(35, Pin.IN, Pin.PULL_UP).value():
-    power_rgb.fill((3, 0, 0))
-    power_rgb.write()
+if not Pin(5, Pin.IN).value():
+    from neopixel import NeoPixel
+    _rgb = NeoPixel(Pin(9), 2)
+    _rgb.fill((0, 10, 0))
+    _rgb.write()
     print("Entering forced blocking mode")
     while True:
         pass

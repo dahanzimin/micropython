@@ -1,0 +1,2 @@
+#define MICROPY_HW_BOARD_NAME "RM_E1 Lite"
+#define MICROPY_HW_MCU_NAME "ESP32"
