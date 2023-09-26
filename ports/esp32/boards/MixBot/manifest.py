@@ -1,6 +1,6 @@
 freeze("modules")
-freeze("$(MPY_DIR)/drivers/mixly2.0_src/board/micropython_robot/build/lib", ("mixbot.py", "mixbot_ext.py"))
-freeze("$(MPY_DIR)/drivers/mixly2.0_src/board/micropython_common/build/lib")
+freeze("$(MPY_DIR)/drivers/mixly2.0_src/boards/default/micropython_robot/build/lib", ("mixbot.py", "mixbot_ext.py"))
+freeze("$(MPY_DIR)/drivers/mixly2.0_src/boards/default/micropython_common/build/lib")
 freeze("$(MPY_DIR)/tools", ("upip.py", "upip_utarfile.py"))
 #freeze("$(MPY_DIR)/ports/esp8266/modules", "ntptime.py")
 freeze("$(MPY_DIR)/drivers/dht", "dht.py")

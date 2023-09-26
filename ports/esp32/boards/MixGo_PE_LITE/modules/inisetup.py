@@ -39,14 +39,11 @@ def setup():
     with open("boot.py", "w") as f:
         f.write(
             """\
-#Judging the blocking mode is helpful to enter the terminal.
-from machine import Pin
-
-if not Pin(0, Pin.IN).value():
-    print("Entering forced blocking mode")
-    while True:
-        pass
-
+# This file is executed on every boot (including wake-boot from deepsleep)
+#import esp
+#esp.osdebug(None)
+#import webrepl
+#webrepl.start()
 """
         )
     return vfs

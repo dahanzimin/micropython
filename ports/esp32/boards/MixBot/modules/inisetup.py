@@ -55,15 +55,6 @@ power_key = Pin(34, Pin.IN )
 power_key.irq(handler= irq_func, trigger= Pin.IRQ_RISING)
 power_en.value(1)
 
-if not Pin(39, Pin.IN).value():
-    from neopixel import NeoPixel
-    _rgb = NeoPixel(Pin(12), 2)
-    _rgb.fill((10, 0, 0))
-    _rgb.write()
-    print("Entering forced blocking mode")
-    while True:
-        pass
-
 """
         )
     return vfs

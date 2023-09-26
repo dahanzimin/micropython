@@ -1,5 +1,5 @@
 freeze("modules")
-freeze("$(MPY_DIR)/drivers/mixly2.0_src/boards/default/micropython_esp32c3/build/lib", "mixgocar_c3.py")
+freeze("$(MPY_DIR)/drivers/mixly2.0_src/boards/default/micropython_robot/build/lib", ("mixgo_baize.py", "bot51.py"))
 freeze("$(MPY_DIR)/drivers/mixly2.0_src/boards/default/micropython_common/build/lib")
 freeze("$(MPY_DIR)/tools", ("upip.py", "upip_utarfile.py"))
 #freeze("$(MPY_DIR)/ports/esp8266/modules", "ntptime.py")

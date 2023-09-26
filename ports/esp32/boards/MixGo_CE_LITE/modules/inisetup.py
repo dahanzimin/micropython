@@ -47,13 +47,6 @@ power_rgb = NeoPixel(Pin(45), 1)
 power_rgb.fill((0, 3, 0))
 power_rgb.write()
 
-if not Pin(35, Pin.IN, Pin.PULL_UP).value():
-    power_rgb.fill((3, 0, 0))
-    power_rgb.write()
-    print("Entering forced blocking mode")
-    while True:
-        pass
-
 """
         )
     return vfs
