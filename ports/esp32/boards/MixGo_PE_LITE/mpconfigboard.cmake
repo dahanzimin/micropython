@@ -3,7 +3,7 @@ set(SDKCONFIG_DEFAULTS
     boards/sdkconfig.ble
     boards/sdkconfig.spiram
     boards/sdkconfig.240mhz
-    boards/MixGo_PE_LITE/sdkconfig.board
+    ${MICROPY_BOARD_DIR}/sdkconfig.board
 )
 
 set(MICROPY_FROZEN_MANIFEST ${MICROPY_BOARD_DIR}/manifest.py)
