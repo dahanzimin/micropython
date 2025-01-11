@@ -30,6 +30,11 @@
 #include "py/parse.h"
 #include "py/emitglue.h"
 
+#if MICROPY_COMP_ALLOW_TOP_LEVEL_AWAIT
+// set to `true` to allow top-level await expressions
+extern bool mp_compile_allow_top_level_await;
+#endif
+
 // the compiler will raise an exception if an error occurred
 // the compiler will clear the parse tree before it returns
 // mp_globals_get() will be used for the context
@@ -37,7 +42,7 @@ mp_obj_t mp_compile(mp_parse_tree_t *parse_tree, qstr source_file, bool is_repl)
 
 #if MICROPY_PERSISTENT_CODE_SAVE
 // this has the same semantics as mp_compile
-mp_compiled_module_t mp_compile_to_raw_code(mp_parse_tree_t *parse_tree, qstr source_file, bool is_repl, mp_module_context_t *globals);
+void mp_compile_to_raw_code(mp_parse_tree_t *parse_tree, qstr source_file, bool is_repl, mp_compiled_module_t *cm);
 #endif
 
 // this is implemented in runtime.c

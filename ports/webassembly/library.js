@@ -25,45 +25,51 @@
  */
 
 mergeInto(LibraryManager.library, {
-    mp_js_write: function(ptr, len) {
-        for (var i = 0; i < len; ++i) {
-            if (typeof window === 'undefined') {
-                var b = Buffer.alloc(1);
-                b.writeInt8(getValue(ptr + i, 'i8'));
-                process.stdout.write(b);
-            } else {
-                var c = String.fromCharCode(getValue(ptr + i, 'i8'));
-                var printEvent = new CustomEvent('micropython-print', { detail: c });
-                document.dispatchEvent(printEvent);
-            }
-        }
-    },
+    // This string will be emitted directly into the output file by Emscripten.
+    mp_js_ticks_ms__postset: "var MP_JS_EPOCH = Date.now()",
 
-    mp_js_ticks_ms: function() {
-        return Date.now() - MP_JS_EPOCH;
-    },
+    mp_js_ticks_ms: () => Date.now() - MP_JS_EPOCH,
 
-    mp_js_hook: function() {
-        if (typeof window === 'undefined') {
-            var mp_interrupt_char = Module.ccall('mp_hal_get_interrupt_char', 'number', ['number'], ['null']);
-            var fs = require('fs');
+    mp_js_hook: () => {
+        if (ENVIRONMENT_IS_NODE) {
+            const mp_interrupt_char = Module.ccall(
+                "mp_hal_get_interrupt_char",
+                "number",
+                ["number"],
+                ["null"],
+            );
+            const fs = require("fs");
 
-            var buf = Buffer.alloc(1);
+            const buf = Buffer.alloc(1);
             try {
-                var n = fs.readSync(process.stdin.fd, buf, 0, 1);
+                const n = fs.readSync(process.stdin.fd, buf, 0, 1);
                 if (n > 0) {
-                    if (buf[0] == mp_interrupt_char) {
-                        Module.ccall('mp_sched_keyboard_interrupt', 'null', ['null'], ['null']);
+                    if (buf[0] === mp_interrupt_char) {
+                        Module.ccall(
+                            "mp_sched_keyboard_interrupt",
+                            "null",
+                            ["null"],
+                            ["null"],
+                        );
                     } else {
                         process.stdout.write(String.fromCharCode(buf[0]));
                     }
                 }
             } catch (e) {
-                if (e.code === 'EAGAIN') {
+                if (e.code === "EAGAIN") {
                 } else {
                     throw e;
                 }
             }
         }
     },
+
+    mp_js_time_ms: () => Date.now(),
+
+    // Node prior to v19 did not expose "crypto" as a global, so make sure it exists.
+    mp_js_random_u32__postset:
+        "if (globalThis.crypto === undefined) { globalThis.crypto = require('crypto'); }",
+
+    mp_js_random_u32: () =>
+        globalThis.crypto.getRandomValues(new Uint32Array(1))[0],
 });
